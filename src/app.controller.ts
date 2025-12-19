@@ -7,7 +7,7 @@ export class AppController {
 
   @Get('pingdb')
   ping() {
-    this.db.getDb();
+    this.db.users();
     return { status: 'ok' };
   }
 }

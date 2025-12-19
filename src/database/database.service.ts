@@ -1,6 +1,7 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { MongoClient, Db } from 'mongodb';
+import { MongoClient, Db, Collection } from 'mongodb';
 import { ConfigService } from '@nestjs/config';
+import { UserEntity } from '../users/entities/user.entity';
 
 @Injectable()
 export class DatabaseService implements OnModuleInit, OnModuleDestroy {
@@ -13,12 +14,8 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     const uri = this.config.get<string>('mongo.uri');
     const dbName = this.config.get<string>('mongo.dbName');
 
-    if (!uri) {
-      throw new Error('MONGO_URI is not defined');
-    }
-
-    if (!dbName) {
-      throw new Error('MONGO_DB_NAME is not defined');
+    if (!uri || !dbName) {
+      throw new Error('Mongo config missing');
     }
 
     this.client = new MongoClient(uri);
@@ -28,15 +25,11 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     console.log('MongoDB connected');
   }
 
-  getDb(): Db {
-    if (!this.db) {
-      throw new Error('Database not initialized');
-    }
-    return this.db;
+  users(): Collection<UserEntity> {
+    return this.db.collection<UserEntity>('users');
   }
 
   async onModuleDestroy() {
     await this.client.close();
-    console.log('MongoDB disconnected');
   }
 }
